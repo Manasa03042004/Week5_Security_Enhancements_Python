@@ -99,7 +99,10 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         return Fernet(key.encode() if isinstance(key, str) else key)
 
     def render_page(title: str, body: str, **context: Any):
-        return render_template_string(PAGE, title=title, body=render_template_string(body, **context),
+        context.setdefault("user_id", session.get("user_id"))
+        context.setdefault("csrf_token", csrf_token())
+        rendered_body = render_template_string(body, **context)
+        return render_template_string(PAGE, title=title, body=rendered_body,
                                       user_id=session.get("user_id"), csrf_token=csrf_token())
 
     def login_required(view):
